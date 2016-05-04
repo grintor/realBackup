@@ -19,4 +19,4 @@ prefix: optional: A prefix to add to the subject line of the email to better ide
 
 Example:
 
-reliaCopy "C:\Program Files\Microsoft SQL Server\MSSQL13.X" "\\server01\backups" rcpt@gmail.com "cGFzcw==" whoever@whatever.com SQL-DB
+reliaCopy "C:\Program Files\Microsoft SQL Server\MSSQL13.X" "\\\server01\backups" rcpt@gmail.com "cGFzcw==" whoever@whatever.com SQL-DB
