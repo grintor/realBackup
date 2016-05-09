@@ -16,7 +16,7 @@ set shadow_volume=
 
 if not exist "%source_path%" call :fail 0 & exit /b 100
 
-for /f "tokens=1,2,* delims=;= " %%a in ('wmic shadowcopy call create "ClientAccessible"^,"%drive_letter%\"') do set %%a=%%~b
+for /f "tokens=1,2,* delims=;= " %%a in ('wmic shadowcopy call create "ClientAccessible"^,"%drive_letter%\"^| findstr /c:ReturnValue /c:ShadowID') do set %%a=%%~b
 if not '%ReturnValue%'=='0' call :fail 1 & exit /b 110
 
 for /f "tokens=2 delims=?" %%a in ('vssadmin list shadows /shadow^=%ShadowID% ^| find "\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy"') do set shadow_volume=\\?%%a\
