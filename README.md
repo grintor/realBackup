@@ -24,3 +24,6 @@ reliaCopy "C:\Program Files\Microsoft SQL Server\MSSQL13.X" "\\\server01\backups
 
 NOTE: to base64 encode the password, there are online tools:
 https://www.base64encode.org/
+
+NOTE2: Due to a windows bug, the following hotfox may be needed:
+https://support.microsoft.com/en-us/kb/2695888
