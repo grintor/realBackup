@@ -19,7 +19,11 @@ prefix: optional: A prefix to add to the subject line of the email to better ide
 
 Example:
 
-reliaCopy "C:\Program Files\Microsoft SQL Server\MSSQL13.X" "\\\server01\backups" rcpt@gmail.com "cGFzcw==" whoever@whatever.com SQL-DB
+reliaCopy "C:\Program Files\Microsoft SQL Server\MSSQL13.X" "\\\server01\backups\MSSQL13.X" rcpt@gmail.com "cGFzcw==" whoever@whatever.com SQL-DB
+
+OR without email alerts:
+
+reliaCopy "C:\Program Files\Microsoft SQL Server\MSSQL13.X" "\\\server01\backups\MSSQL13.X"
 
 
 NOTE: to base64 encode the password, there are online tools:
