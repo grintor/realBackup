@@ -1,6 +1,6 @@
 @echo off
-if "%2"=="" goto usage
-if not "%3"=="" if "%5"=="" goto usage
+if "%~2"=="" goto usage
+if not "%~3"=="" if "%~5"=="" goto usage
 
 set source_path=%~1
 set destination_path=%~2
