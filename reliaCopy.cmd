@@ -58,7 +58,11 @@ if %1==5 (
            vssadmin delete shadows /shadow=%ShadowID% /quiet > nul
            set err=Failed to copy the file ACL information to the destination.
          )
-if %1==6 set err=The version of robocopy is incompatible
+if %1==6 (
+           rd "%tmp_mount%"
+           vssadmin delete shadows /shadow=%ShadowID% /quiet > nul
+           set err=The version of robocopy is incompatible.
+         )
 if defined gmail_address call :send_email "%err%"
 echo %err%
 goto :EOF
