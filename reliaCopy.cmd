@@ -25,10 +25,12 @@ if not defined shadow_volume call :fail 2 & exit /b 120
 mklink /d "%tmp_mount%" "%shadow_volume%" > nul
 if not %errorlevel%==0 call :fail 3 & exit /b 130
 
-robocopy "%shadow_source_path%" "%destination_path%" /MIR /FFT /W:1 /R:5 > nul
+robocopy "%shadow_source_path%" "%destination_path%" /MIR /FFT /W:1 /R:5 /XJD /SL /MT > nul
+if %errorlevel% equ 16 call :fail 6 & exit /b 160
 if %errorlevel% gtr 7 call :fail 4 & exit /b 140
 
-robocopy "%shadow_source_path%" "%destination_path%" /E /Copy:S /IS /IT /W:1 /R:5 > nul
+robocopy "%shadow_source_path%" "%destination_path%" /E /Copy:S /IS /IT /W:1 /R:5 /XJD /SL /MT > nul
+if %errorlevel% equ 16 call :fail 6 & exit /b 160
 if %errorlevel% gtr 7 call :fail 5 & exit /b 150
 
 rd "%tmp_mount%"
@@ -56,6 +58,7 @@ if %1==5 (
            vssadmin delete shadows /shadow=%ShadowID% /quiet > nul
            set err=Failed to copy the file ACL information to the destination.
          )
+if %1==6 set err=The version of robocopy is incompatible
 if defined gmail_address call :send_email "%err%"
 echo %err%
 goto :EOF
