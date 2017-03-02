@@ -17,7 +17,15 @@ set ShadowID=
 
 if not exist "%source_path%" call :fail 0 & exit /b 100
 
-for /f "tokens=1,2 delims=:" %%a in ('vssadmin Create Shadow /For^=%drive_letter% /AutoRetry^=3') do (
+
+vssadmin Create Shadow /For=%drive_letter% /AutoRetry=3 > "%temp%\reliacopy-vssadmin.tmp"
+if %errorlevel% equ 2 (
+	del "%temp%\reliacopy-vssadmin.tmp" > nul
+	goto wmic_fallback
+)
+
+
+for /f "tokens=1,2 delims=:" %%a in ('type "%temp%\reliacopy-vssadmin.tmp"') do (
 	echo %%a | findstr /c:"Shadow Copy ID" > nul && (
 		set ShadowID=%%b
 	)
@@ -26,10 +34,28 @@ for /f "tokens=1,2 delims=:" %%a in ('vssadmin Create Shadow /For^=%drive_letter
 	)
 )
 
+del "%temp%\reliacopy-vssadmin.tmp" > nul
 if not defined ShadowID call :fail 1 & exit /b 120
 if not defined shadow_volume call :fail 2 & exit /b 120
 set ShadowID=%ShadowID: =%
 set shadow_volume=%shadow_volume: =%
+
+goto wmic_fallback-bypass
+:wmic_fallback
+
+wmic shadowcopy call create "ClientAccessible","%drive_letter%\">"%temp%\reliacopy-wmic.tmp" 2>&1
+if %errorlevel% equ -2147217388 (
+	del "%temp%\reliacopy-wmic.tmp" > nul
+	call :fail 6 & exit /b 160
+)
+for /f "tokens=1,2,* delims=;= " %%a in ('type "%temp%\reliacopy-wmic.tmp" ^| findstr /c:ReturnValue /c:ShadowID') do set %%a=%%~b
+del "%temp%\reliacopy-wmic.tmp" > nul
+if not '%ReturnValue%'=='0' call :fail 1 & exit /b 110
+
+for /f "tokens=2 delims=?" %%a in ('vssadmin list shadows /shadow^=%ShadowID% ^| find "\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy"') do set shadow_volume=\\?%%a\
+if not defined shadow_volume call :fail 2 & exit /b 120
+
+:wmic_fallback-bypass
 
 mklink /d "%tmp_mount%" "%shadow_volume%" > nul
 if not %errorlevel%==0 call :fail 3 & exit /b 130
@@ -71,6 +97,7 @@ if %1==5 (
            vssadmin delete shadows /shadow=%ShadowID% /quiet > nul
            set err=Failed to copy the file ACL information to the destination.
          )
+if %1==6 set err='Permission Denied' when creating volume shadow copy.
 if defined gmail_address call :send_email "%err%"
 echo %err%
 goto :EOF
