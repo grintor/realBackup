@@ -13,14 +13,23 @@ set tmp_mount=%drive_letter%\temp-%random%
 set shadow_source_path=%tmp_mount%\%source_path:~3%
 if defined subject_prefix set email_subject=%subject_prefix%: %computername%
 set shadow_volume=
+set ShadowID=
 
 if not exist "%source_path%" call :fail 0 & exit /b 100
 
-for /f "tokens=1,2,* delims=;= " %%a in ('wmic shadowcopy call create "ClientAccessible"^,"%drive_letter%\"^| findstr /c:ReturnValue /c:ShadowID') do set %%a=%%~b
-if not '%ReturnValue%'=='0' call :fail 1 & exit /b 110
+for /f "tokens=1,2 delims=:" %%a in ('vssadmin Create Shadow /For^=%drive_letter% /AutoRetry^=3') do (
+	echo %%a | findstr /c:"Shadow Copy ID" > nul && (
+		set ShadowID=%%b
+	)
+	echo %%a | findstr /c:"Shadow Copy Volume Name" > nul && (
+		set shadow_volume=%%b
+	)
+)
 
-for /f "tokens=2 delims=?" %%a in ('vssadmin list shadows /shadow^=%ShadowID% ^| find "\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy"') do set shadow_volume=\\?%%a\
+if not defined ShadowID call :fail 1 & exit /b 120
 if not defined shadow_volume call :fail 2 & exit /b 120
+set ShadowID=%ShadowID: =%
+set shadow_volume=%shadow_volume: =%
 
 mklink /d "%tmp_mount%" "%shadow_volume%" > nul
 if not %errorlevel%==0 call :fail 3 & exit /b 130
@@ -62,7 +71,6 @@ if %1==5 (
            vssadmin delete shadows /shadow=%ShadowID% /quiet > nul
            set err=Failed to copy the file ACL information to the destination.
          )
-
 if defined gmail_address call :send_email "%err%"
 echo %err%
 goto :EOF
