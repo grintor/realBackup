@@ -62,13 +62,13 @@ if not %errorlevel%==0 call :fail 3 & exit /b 130
 
 robocopy "%shadow_source_path%" "%destination_path%" /MIR /FFT /W:1 /R:5 /XJD /SL /MT > nul
 if %errorlevel% equ 16 (
-	robocopy "%shadow_source_path%" "%destination_path%" /MIR /FFT /W:1 /R:5 /XJD /SL > nul
+	robocopy "%shadow_source_path%" "%destination_path%" /MIR /FFT /W:1 /R:5 > nul
 )
 if %errorlevel% gtr 7 call :fail 4 & exit /b 140
 
 robocopy "%shadow_source_path%" "%destination_path%" /E /Copy:S /IS /IT /W:1 /R:5 /XJD /SL /MT > nul
 if %errorlevel% equ 16 (
-	robocopy "%shadow_source_path%" "%destination_path%" /E /Copy:S /IS /IT /W:1 /R:5 /XJD /SL > nul
+	robocopy "%shadow_source_path%" "%destination_path%" /E /Copy:S /IS /IT /W:1 /R:5 > nul
 )
 if %errorlevel% gtr 7 call :fail 5 & exit /b 150
 
